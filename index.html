@@ -2,133 +2,52 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Pelacakan Pesanan</title>
-
-<style>
-body{
-font-family:Arial;
-background:#f4f6f8;
-padding:30px;
-text-align:center;
-}
-
-.container{
-max-width:700px;
-margin:auto;
-background:white;
-padding:25px;
-border-radius:10px;
-box-shadow:0 0 12px rgba(0,0,0,0.1);
-}
-
-.judul{
-font-size:24px;
-font-weight:bold;
-margin-bottom:20px;
-}
-
-.info{
-background:#f8f8f8;
-padding:15px;
-border-radius:8px;
-margin-bottom:25px;
-}
-
-.nama{
-font-size:20px;
-font-weight:bold;
-}
-
-.hp{
-color:#555;
-}
-
-.timeline{
-text-align:left;
-margin-top:20px;
-}
-
-.item{
-border-left:3px solid #ddd;
-padding-left:15px;
-margin-bottom:15px;
-}
-
-.tanggal{
-font-size:13px;
-color:#777;
-}
-
-.status{
-font-size:15px;
-}
-</style>
-
+<title>Tracking Paket</title>
 </head>
 
 <body>
 
-<div class="container">
+<h2>Tracking Paket</h2>
 
-<div class="judul">
-Pelacakan Pesanan Kapsul Pinang Muda
-</div>
-
-<div class="info" id="info">
-Memuat data...
-</div>
-
-<div id="history"></div>
-
-</div>
+<div id="hasil">Loading...</div>
 
 <script>
 
 const resi = new URLSearchParams(window.location.search).get("resi");
 
 if(!resi){
-document.getElementById("info").innerHTML="Resi tidak ditemukan di URL";
-}
+document.getElementById("hasil").innerText="Resi tidak ada di link";
+}else{
 
-const api =
-"https://corsproxy.io/?"+
-encodeURIComponent(
+const api="https://api.allorigins.win/raw?url="+encodeURIComponent(
 "https://app.mengantar.com/api/order/getPublic?tracking_number="+resi+"&courier=JNE"
 );
 
 fetch(api)
-.then(res=>res.json())
+.then(r=>r.json())
 .then(data=>{
 
 if(!data.success){
-document.getElementById("info").innerHTML="Data pelacakan tidak ditemukan";
+document.getElementById("hasil").innerText="Tracking tidak ditemukan";
 return;
 }
 
-const d = data.data;
-
-document.getElementById("info").innerHTML = `
-<div class="nama">${d.RECEIVER_NAME}</div>
-<div class="hp">${d.RECEIVER_PHONE || "-"}</div>
-`;
+let history=data.data.history;
 
 let html="";
 
-d.history.reverse().forEach(h=>{
-html += `
-<div class="item">
-<div class="tanggal">${h.date}</div>
-<div class="status">${h.desc}</div>
-</div>
-`;
+history.forEach(h=>{
+html+="<p>"+h.date+" - "+h.desc+"</p>";
 });
 
-document.getElementById("history").innerHTML = html;
+document.getElementById("hasil").innerHTML=html;
 
 })
-.catch(err=>{
-document.getElementById("info").innerHTML="Gagal mengambil data tracking";
+.catch(()=>{
+document.getElementById("hasil").innerText="Gagal mengambil data";
 });
+
+}
 
 </script>
 
